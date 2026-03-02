@@ -1,6 +1,6 @@
-# Acoustic_Indices
+# Acoustic_Indices_Go
 
-Acoustic_Indices is a Python library to extract global acoustic indices from an audio file for use as a biodiversity proxy, within the framework of Ecoacoustics.
+Acoustic_Indices_Go is a Go command-line tool to extract global acoustic indices from audio (WAV) files for use as a biodiversity proxy, within the framework of Ecoacoustics. It supports configurable parallelism using goroutines to speed up large-scale extraction.
 
 
 ## Indices
@@ -16,16 +16,70 @@ Acoustic_Indices is a Python library to extract global acoustic indices from an 
     * Number of Peaks
     * Wave Signal to Noise Ratio
 
+* Noise-removed variants
+    * Acoustic Diversity Index (NR)
+    * Acoustic Evenness Index (NR)
+    * Bioacoustic Index (NR)
+    * Spectral Entropy (NR)
+
 * Spectral features extraction
     * Spectral centroid
     * Spectrogram
-    * Noise removed spectrogram
 
 * Temporal features extraction
     * RMS energy
     * Zero Crossing Rate
 
 
+## Build
+
+Requires Go 1.21 or later.
+
+```sh
+go build -o acoustic-indices .
+```
+
+
+## Usage
+
+```
+./acoustic-indices [flags]
+
+Flags:
+  -input   string   Directory containing WAV files (default: "audio_files")
+  -output  string   Output CSV file path (default: "acoustic_indices.csv")
+  -workers int      Number of parallel goroutines (default: number of CPU cores)
+  -config  string   YAML configuration file (default: "yaml/config_014_butter.yaml")
+```
+
+### Examples
+
+Process all WAV files in `my_recordings/` using 8 goroutines:
+```sh
+./acoustic-indices -input my_recordings -output results.csv -workers 8
+```
+
+Use a custom configuration:
+```sh
+./acoustic-indices -input audio_files -output out.csv -workers 4 -config yaml/config_014_butter.yaml
+```
+
+### Output
+
+A CSV file with one row per audio file and one column per index value (e.g. `Acoustic_Complexity_Index__main_value`, `RMS_energy__mean`, etc.).
+
+
+## Configuration
+
+The YAML configuration file (see `yaml/config_014_butter.yaml`) controls:
+- Optional pre-processing: Butterworth high-pass filtering
+- Which indices to compute and their parameters
+
+The pipeline for each file:
+1. Read WAV file
+2. Apply optional high-pass filter (if configured)
+3. Compute the configured acoustic indices
+4. Write results to the CSV file
 
 
 ## Reference
@@ -36,8 +90,45 @@ If you use this code, please cite: Patrice Guyot, & Alice Eldridge. (2023). Pyth
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10391651.svg)](https://doi.org/10.5281/zenodo.10391651)
 
 
+## Publications
+
+This code has been used in the following scientific papers:
+
+* Martínez-Tabares, F., & Orozco-Alzate, M. (2023). Identifying Acoustic Features to Distinguish Highly and Moderately Altered Soundscapes in Colombia. Inteligencia Artificial, 26(71), 34-45.
+* Durbridge, S., & Murphy, D. T. (2023). Assessment of soundscapes using self-report and physiological measures. Acta Acustica, 7, 6.
+* Martínez-Tabares, F., & Orozco-Alzate, M. (2022, November). Selection of acoustic features for the discrimination between highly and moderately transformed Colombian soundscapes. In Ibero-American Conference on Artificial Intelligence (pp. 121-132). Cham: Springer International Publishing.
+* Sumitani, S., Suzuki, R., Morimatsu, T., Matsubayashi, S., Arita, T., Nakadai, K., & Okuno, H. G. (2020, January). Soundscape Analysis of Bird Songs in Forests Using Microphone Arrays. In 2020 IEEE/SICE International Symposium on System Integration (SII) (pp. 634-639). IEEE.
+* Carruthers-Jones, J., Eldridge, A., Guyot, P., Hassall, C., & Holmes, G. (2019). The call of the wild: Investigating the potential for ecoacoustic methods in mapping wilderness areas. Science of the Total Environment, 695, 133797.
+* Eldridge, A., Guyot, P., Moscoso, P., Johnston, A., Eyre-Walker, Y., & Peck, M. (2018). Sounding out ecoacoustic metrics: Avian species richness is predicted by acoustic indices in temperate but not tropical habitats. Ecological Indicators, 95, 939-952.
 
 
+## Credits
+
+The following indices are based on the following papers and inspired in part by the R packages [seewave](https://cran.r-project.org/package=seewave) and [soundecology](https://cran.r-project.org/package=soundecology)
+* Acoustic Complexity Index - Pieretti et al. (2011)
+* Acoustic Diversity Index - Villanueva-Rivera et al. (2011)
+* Acoustic Evenness Index - Villanueva-Rivera et al. (2011)
+* Bioacoustic Index - Boelman, et al. (2007)
+* Normalized Difference Sound Index - Kasten et al. (2012)
+* Spectral Entropy - Sueur et al. (2008)
+* Temporal Entropy - Sueur et al. (2008)
+
+References:
+
+* Boelman NT, Asner GP, Hart PJ, Martin RE. 2007. Multi-trophic invasion resistance in Hawaii: bioacoustics, field surveys, and airborne remote sensing. Ecological Applications 17: 2137-2144.
+
+* Farina A, Pieretti N, Piccioli L (2011) The soundscape methodology for long-term bird monitoring: a Mediterranean Europe case-study. Ecological Informatics, 6, 354-363.
+
+* Kasten, E.P., Gage, S.H., Fox, J. & Joo, W. (2012). The remote environmental assessment laboratory's acoustic library: an archive for studying soundscape ecology. Ecological Informatics, 12, 50-67.
+
+* Pieretti N, Farina A, Morri FD (2011) A new methodology to infer the singing activity of an avian community: the Acoustic Complexity Index (ACI). Ecological Indicators, 11, 868-873.
+
+* Sueur, J., Pavoine, S., Hamerlynck, O. & Duvail, S. (2008) - Rapid acoustic survey for biodiversity appraisal. PLoS ONE, 3(12): e4065.
+
+* Villanueva-Rivera, L. J., B. C. Pijanowski, J. Doucette, and B. Pekin. 2011. A primer of acoustic analysis for landscape ecologists. Landscape Ecology 26: 1233-1246. doi: 10.1007/s10980-011-9636-9.
+
+
+This research was generously funded by Leverhulme Research Project Grant RPG-2014-403.
 
 ## Publications
 
